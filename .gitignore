@@ -4,4 +4,8 @@ parsing_test.ipynb
 
 pdf/
 results/
-system_prompt.txt
+
+**/__pycache__/
+
+*.txt
+*.md

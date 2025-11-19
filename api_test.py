@@ -21,7 +21,7 @@ def load_prompt(file_path: str = "") -> str:
         return None
 
 data = {
-    "model": 'deepseek-ai/DeepSeek-R1-0528',
+    "model": 'Qwen/Qwen3-235B-A22B-Thinking-2507',
     "messages": [
         {
             "role": "system",

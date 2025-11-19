@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-url = f"{os.getenv("IO_CHAT_MODELS")}"
+url = f"{os.getenv('IO_CHAT_MODELS')}"
 
 headers = {"Authorization": f"Bearer {os.getenv('BEARER_API_KEY')}"}
 
