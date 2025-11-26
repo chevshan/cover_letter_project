@@ -26,9 +26,9 @@ def extract_vacancy_description(vacancy_id: str, save_to_file: Optional[str] = N
         return description
         
     except requests.exceptions.RequestException as e:
-        raise Exception(f"Error when requesting to {url}: {e}")
+        raise Exception(f"Error when requesting vacancy {vacancy_id}: {e}")
     except json.JSONDecodeError as e:
-        raise Exception(f"Error when pasing JSON: {e}")
+        raise Exception(f"Error when parsing JSON: {e}")
     except KeyError:
         raise Exception("The key 'description' didn't found")
     finally:
