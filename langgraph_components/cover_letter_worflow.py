@@ -3,6 +3,7 @@ from agents.copywriter_agent import CopyWriterAgent
 from custom_llm import CustomLLM
 from langgraph_components.cover_letter_state import CoverLetterState
 from langgraph.graph import StateGraph
+from langgraph_components.timed_node import timed_node
 
 def create_workflow():
     llm = CustomLLM()
@@ -12,10 +13,18 @@ def create_workflow():
 
     workflow = StateGraph(CoverLetterState)
 
-    workflow.add_node("analyze_vacancy", analyzer_agent.analyze_vacancy)
-    workflow.add_node("analyze_resume", analyzer_agent.analyze_resume)
-    workflow.add_node("create_report", analyzer_agent.create_match_report)
-    workflow.add_node("generate_cover_letter", copywriter_agent.generate_cover_letter)
+    workflow.add_node(
+        "analyze_vacancy", timed_node("analyze_vacancy", analyzer_agent.analyze_vacancy)
+    )
+    workflow.add_node(
+        "analyze_resume", timed_node("analyze_resume", analyzer_agent.analyze_resume)
+    )
+    workflow.add_node(
+        "create_report", timed_node("create_report", analyzer_agent.create_match_report)
+    )
+    workflow.add_node(
+        "generate_cover_letter", timed_node("generate_cover_letter", copywriter_agent.generate_cover_letter)
+    )
 
     workflow.set_entry_point("analyze_vacancy")
     workflow.add_edge("analyze_vacancy", "analyze_resume")
