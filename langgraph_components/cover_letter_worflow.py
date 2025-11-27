@@ -14,6 +14,10 @@ def create_workflow():
     workflow = StateGraph(CoverLetterState)
 
     workflow.add_node(
+        "bootstrap", timed_node("bootstrap", lambda state: {})
+    )
+
+    workflow.add_node(
         "analyze_vacancy", timed_node("analyze_vacancy", analyzer_agent.analyze_vacancy)
     )
     workflow.add_node(
@@ -26,8 +30,10 @@ def create_workflow():
         "generate_cover_letter", timed_node("generate_cover_letter", copywriter_agent.generate_cover_letter)
     )
 
-    workflow.set_entry_point("analyze_vacancy")
-    workflow.add_edge("analyze_vacancy", "analyze_resume")
+    workflow.set_entry_point("bootstrap")
+    workflow.add_edge("bootstrap", "analyze_vacancy")
+    workflow.add_edge("bootstrap", "analyze_resume")
+    workflow.add_edge("analyze_vacancy", "create_report")
     workflow.add_edge("analyze_resume", "create_report")
     workflow.add_edge("create_report", "generate_cover_letter")
     workflow.set_finish_point("generate_cover_letter")

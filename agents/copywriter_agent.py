@@ -7,41 +7,41 @@ class CopyWriterAgent:
     
     def generate_cover_letter(self, state: Dict[str, Any]) -> Dict[str, Any]:
         analysis_report = state.get("analysis_report", "")
-        vacancy_description = state.get("vacancy_description", "")
-        resume = state.get("resume", "")
+        vacancy_analysis = state.get("vacancy_analysis", "")
+        resume_analysis = state.get("resume_analysis", "")
 
-        system_prompt = """You are an expert copywriter specializing in cover letters. 
-        Create compelling, professional cover letters that are ready to send.
+        system_prompt = """You are a professional HR specialist with expertise in writing cover letters. 
+        Create concise, professional cover letters that are ready to send immediately.
         
-        IMPORTANT: Return ONLY the cover letter text, without any:
-        - Analysis reports
-        - Explanations
+        CRITICAL: Return ONLY the cover letter text without:
+        - Headers like "Cover Letter"
+        - Analysis or reports
         - Markdown formatting
-        - Section headers like "Cover Letter"
-        - Additional comments
+        - Comments or explanations
+        - Generic closings like "Sincerely yours"
         
-        The output should be a clean, professional letter that can be directly copied and sent to employers."""
+        The letter must be ready to copy and send to employers."""
 
         prompt = f"""
-        Based on the analysis below, write a professional cover letter that is ready to send immediately.
+        Based on the job and candidate analysis, create a cover letter.
 
-        JOB DESCRIPTION:
-        {vacancy_description}
+        JOB REQUIREMENTS:
+        {vacancy_analysis}
 
-        CANDIDATE BACKGROUND:
-        {resume}
+        CANDIDATE QUALIFICATIONS:
+        {resume_analysis}
 
-        ANALYSIS INSIGHTS:
+        KEY MATCHES:
         {analysis_report}
 
-        Write a compelling cover letter that:
-        1. Starts with professional salutation
-        2. Highlights the candidate's most relevant skills and experience for this specific position
-        3. Shows enthusiasm for the company/role
-        4. Ends with professional closing and call to action
-        5. Is tailored, professional, and ready to send
+        Write a letter that:
+        • Starts with professional greeting
+        • Focuses on technologies and skills from job requirements
+        • Highlights specific relevant experience
+        • Is concise (max 200 words), professional and to the point
+        • Ends with call to action
 
-        Format it as a proper business letter without any additional explanations or markdown.
+        Focus on technical skills and professional experience. Avoid generic phrases.
         """
 
         cover_letter = self.llm.invoke(prompt, system_prompt)

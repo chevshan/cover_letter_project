@@ -58,8 +58,18 @@ class VacancyAnalyzerAgent:
         return {"resume_analysis": analysis}
         
     def create_match_report(self, state: Dict[str, Any]) -> Dict[str, Any]:
-        vacancy_analysis = state.get("vacancy_analysis", "")
-        resume_analysis = state.get("resume_analysis", "")
+        vacancy_analysis = state.get("vacancy_analysis")
+        resume_analysis = state.get("resume_analysis")
+
+        missing = [
+            name for name, value in [
+                ("vacancy_analysis", vacancy_analysis),
+                ("resume_analysis", resume_analysis),
+            ] if value is None
+        ]
+        if missing:
+            missing_str = ", ".join(missing)
+            raise ValueError(f"create_match_report requires completed analyses: {missing_str}")
         
         system_prompt = """You are a recruitment expert. Compare job requirements 
         and candidate competencies to create an objective and useful report for composing 
