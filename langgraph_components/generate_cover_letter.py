@@ -5,7 +5,10 @@ import time
 def generate_cover_letter(vacancy: str, resume: str, workflow) -> Dict[str, Any]:
     initial_state = {
         "vacancy_description": vacancy,
-        "resume": resume
+        "resume": resume,
+        "revision_attempts": 0,
+        "needs_revision": False,
+        "cover_letter_feedback": "",
     }
 
     start = time.perf_counter()

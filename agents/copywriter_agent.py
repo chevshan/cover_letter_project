@@ -9,6 +9,8 @@ class CopyWriterAgent:
         analysis_report = state.get("analysis_report", "")
         vacancy_analysis = state.get("vacancy_analysis", "")
         resume_analysis = state.get("resume_analysis", "")
+        reviewer_feedback = state.get("cover_letter_feedback", "").strip()
+        revision_attempts = state.get("revision_attempts", 0)
 
         system_prompt = """You are a professional HR specialist with expertise in writing cover letters. 
         Create concise, professional cover letters that are ready to send immediately.
@@ -21,6 +23,13 @@ class CopyWriterAgent:
         - Generic closings like "Sincerely yours"
         
         The letter must be ready to copy and send to employers."""
+
+        feedback_section = ""
+        if reviewer_feedback:
+            feedback_section = f"""
+        REVIEWER FEEDBACK (MUST ADDRESS EACH POINT):
+        {reviewer_feedback}
+        """
 
         prompt = f"""
         Based on the job and candidate analysis, create a cover letter.
@@ -42,7 +51,14 @@ class CopyWriterAgent:
         • Ends with call to action
 
         Focus on technical skills and professional experience. Avoid generic phrases.
+        {'Focus on revising the previous draft according to the reviewer feedback.' if reviewer_feedback else ''}
+        {feedback_section}
         """
 
         cover_letter = self.llm.invoke(prompt, system_prompt)
-        return {"cover_letter": cover_letter}
+        return {
+            "draft_cover_letter": cover_letter.strip(),
+            "revision_attempts": revision_attempts + 1,
+            "needs_revision": False,
+            "cover_letter_feedback": "",
+        }
