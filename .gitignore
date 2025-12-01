@@ -4,9 +4,10 @@ parsing_test.ipynb
 
 pdf/
 results/
+utils/groq_llm_tests
+utils/io_llm_tests
 
 **/__pycache__/
 
 *.txt
-*.md
 *.ipynb
