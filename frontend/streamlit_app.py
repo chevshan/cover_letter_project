@@ -1,6 +1,6 @@
 import json
 import os
-import tempfile
+import uuid
 from pathlib import Path
 from typing import Optional
 
@@ -12,23 +12,22 @@ from dotenv import load_dotenv
 load_dotenv()
 
 API_URL = os.getenv("COVER_LETTER_API_URL", "http://localhost:8000")
+UPLOADS_DIR = Path("/app/uploads")  
 
 
-def save_uploaded_pdf(uploaded_file) -> Optional[str]:
+def save_uploaded_pdf_to_shared_volume(uploaded_file) -> Optional[str]:
     if uploaded_file is None:
         return None
 
-    temp_dir = Path(tempfile.gettempdir())
-    temp_dir.mkdir(parents=True, exist_ok=True)
+    UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
 
-    temp_file = tempfile.NamedTemporaryFile(
-        dir=temp_dir, suffix=".pdf", delete=False
-    )
-    temp_file.write(uploaded_file.read())
-    temp_file.flush()
-    temp_file.close()
+    filename = f"resume_{uuid.uuid4().hex}.pdf"
+    file_path = UPLOADS_DIR / filename
 
-    return temp_file.name
+    with open(file_path, "wb") as f:
+        f.write(uploaded_file.getvalue())
+
+    return filename  
 
 
 def call_backend(data: dict):
@@ -60,12 +59,12 @@ def main():
             st.error("Load the resume.")
             return
 
-        resume_pdf_path = save_uploaded_pdf(uploaded_pdf)
+        resume_filename = save_uploaded_pdf_to_shared_volume(uploaded_pdf)
 
         payload = {
             "vacancy_url": vacancy_url,
             "vacancy_text": None,
-            "resume_pdf_path": resume_pdf_path,
+            "resume_pdf_path": resume_filename,  
             "resume_text": None,
             "save_cover_letter": False,
             "output_file": None,
@@ -75,19 +74,19 @@ def main():
             try:
                 response = call_backend(payload)
             except requests.RequestException as exc:
-                if resume_pdf_path:
+                if resume_filename:
                     try:
-                        Path(resume_pdf_path).unlink(missing_ok=True)
+                        (UPLOADS_DIR / resume_filename).unlink(missing_ok=True)
                     except OSError:
                         pass
                 st.error(f"Error calling the API: {exc}")
                 return
-            else:
-                if resume_pdf_path:
+            finally:
+                if resume_filename:
                     try:
-                        Path(resume_pdf_path).unlink(missing_ok=True)
+                        (UPLOADS_DIR / resume_filename).unlink(missing_ok=True)
                     except OSError:
-                        st.warning("Don't able to remove the temporary resume file.")
+                        st.warning("Could not remove the temporary resume file.")
 
         st.success("The cover letter is ready!")
         st.subheader("Result")

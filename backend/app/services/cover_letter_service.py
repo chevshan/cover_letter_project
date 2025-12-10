@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
 
 from fastapi import HTTPException
@@ -11,6 +12,7 @@ from utils.parsers.pdf_parser import PDFParser
 from utils.parsers.vacancy_description_parser import extract_vacancy_description
 from app.schemas.cover_letter import CoverLetterRequest
 
+UPLOADS_DIR = Path("/app/uploads")
 
 def resolve_vacancy_payload(request_data: CoverLetterRequest) -> Tuple[str, Optional[str]]:
     vacancy_text = request_data.vacancy_text
@@ -55,16 +57,30 @@ def resolve_resume_payload(
             detail="resume_pdf_path must be provided when resume_text is missing",
         )
 
-    if pdf_parser is None:
-        logger.error("PDF parser is not initialized")
-        raise HTTPException(
-            status_code=500,
-            detail="PDF parser is not initialized",
-        )
+    filename = request_data.resume_pdf_path
+    if "/" in filename or "\\" in filename:
+        raise HTTPException(status_code=400, detail="Invalid filename")
+
+    file_path = UPLOADS_DIR / filename
 
     try:
-        resume_text = pdf_parser.parse_pdf(request_data.resume_pdf_path)
-        logger.info("Parsed resume from %s", request_data.resume_pdf_path)
+        file_path = file_path.resolve(strict=False)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid file path")
+
+    if not str(file_path).startswith(str(UPLOADS_DIR.resolve())):
+        raise HTTPException(status_code=400, detail="Access denied")
+
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail=f"Resume file not found: {filename}")
+
+    if pdf_parser is None:
+        logger.error("PDF parser is not initialized")
+        raise HTTPException(status_code=500, detail="PDF parser is not initialized")
+
+    try:
+        resume_text = pdf_parser.parse_pdf(str(file_path))
+        logger.info("Parsed resume from %s", file_path)
         return resume_text
     except Exception as exc:
         logger.exception("Failed to parse resume PDF")
