@@ -24,5 +24,3 @@ This service exposes the existing LangGraph-based cover-letter workflow through 
 - `GET /health` – basic health probe.
 - `POST /generate-cover-letter` – generate cover letter by given url vacancy and file resume:
 
-```
-
