@@ -43,16 +43,26 @@ class CopyWriterAgent:
         KEY MATCHES:
         {analysis_report}
 
-        Write a letter that:
-        • Starts with professional greeting
-        • Focuses on technologies and skills from job requirements
-        • Highlights specific relevant experience
-        • Is concise (max 200 words), professional and to the point
-        • Ends with call to action
-
         Focus on technical skills and professional experience. Avoid generic phrases.
         {'Focus on revising the previous draft according to the reviewer feedback.' if reviewer_feedback else ''}
         {feedback_section}
+        The final letter of recommendation should be such that the user can immediately send it to the employer, take this into account and do not write anything superfluous.
+
+        Example:
+        [Name]
+
+        Dear Hiring Manager,
+
+        I am writing to express my strong interest in the Software Engineer position at Innovate Solutions Inc., as advertised on your careers page. With a solid foundation in full-stack development, experience building scalable web applications, and a passion for solving real-world problems through technology, I am confident in my ability to contribute effectively to your engineering team.
+
+        During my recent role at TechStart Labs, I developed and deployed a React-based dashboard that reduced client onboarding time by 30%. I collaborated closely with product and data teams to integrate RESTful APIs and implemented CI/CD pipelines using GitHub Actions—practices I understand your team values highly. I also optimized backend performance in Python (FastAPI), cutting average response latency by 40%.
+
+        What excites me most about Innovate Solutions is your commitment to ethical AI and user-centric design—principles that align with my own professional values. I admire your recent work on the OpenAccess platform, and I would be honored to help extend its impact through clean, maintainable code and thoughtful engineering.
+
+        Thank you for considering my application. I welcome the opportunity to discuss how my skills and enthusiasm can support your team’s goals. I am available at your convenience for an interview and can be reached at the contact information above.
+
+        Sincerely,
+        [Name]
         """
 
         cover_letter = self.llm.invoke(prompt, system_prompt)
