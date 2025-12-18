@@ -17,9 +17,9 @@ jobs:
         
       - name: Create .env file
         run: |
-          echo "COVER_LETTER_API_URL=${{secrets.COVER_LETTER_API_URL}}" > .env
-          echo "LLAMA_API_KEY=${{secrets.LLAMA_API_KEY}}" >> .env
-          echo "GROQ_API_KEY=${{secrets.GROQ_API_KEY}}" >> .env
+          echo "COVER_LETTER_API_URL=${{ secrets.COVER_LETTER_API_URL }}" > .env
+          echo "LLAMA_API_KEY=${{ secrets.LLAMA_API_KEY }}" >> .env
+          echo "GROQ_API_KEY=${{ secrets.GROQ_API_KEY }}" >> .env
 
       - name: Start Docker Compose services
         run: |
@@ -35,3 +35,32 @@ jobs:
         if: always()
         run: |
           docker compose down --remove-orphans
+  
+  push-to-ghcr:
+    needs: build-and-run
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Build and push image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}:latest
+            ghcr.io/${{ github.repository }}:${{ github.sha }}
